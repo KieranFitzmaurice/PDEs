@@ -1,6 +1,7 @@
 PROGRAM Diffusion
 ! This program uses an FTCS scheme to solve the 1D Diffusion Equation
 
+USE OutputArrays
 IMPLICIT NONE
 
 INTERFACE
@@ -13,8 +14,11 @@ END INTERFACE
 
 INTEGER :: i, n, t_steps
 REAL(KIND = 8) :: k, l, dx, dt, max_dt,t_0,t_f,x_0
-
 REAL(KIND = 8), ALLOCATABLE :: x(:), u(:), concentration(:,:)
+CHARACTER(LEN = 25) :: filepath,filename
+
+filepath = '/Users/kieranfitzmaurice/Documents/GitHub/PDEs/'
+filename = 'diffusion_example'
 
 k = 1 ! Diffusion coefficient
 l = 20 ! Length of rod
@@ -49,16 +53,17 @@ DO i = 1,t_steps
   concentration(:,i) = u
 ENDDO
 
-! Print final concentration profile to screen
-!DO i = 1,n
-!  PRINT *, u(i)
-!ENDDO
+! Write concentration profiles to output file
+CALL output2D_txt(filepath,filename,concentration,n,t_steps)
 
 END PROGRAM Diffusion
 
 !******************************************************************************!
 
 SUBROUTINE u_analytic(x,x_0,t,t_0,u)
+! Analytical solution to diffusion equation for this system
+! Used to generate initial concentration profile
+
 IMPLICIT NONE
 
 REAL(KIND = 8), INTENT(IN) :: x_0, t, t_0
