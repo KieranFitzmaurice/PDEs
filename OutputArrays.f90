@@ -19,11 +19,7 @@ CONTAINS
 
   OPEN(UNIT=1,FILE=full_file,FORM='FORMATTED',STATUS='REPLACE',ACTION='WRITE')
 
-  DO j = 1,ncols
-    DO i = 1,nrows
-      WRITE(1,*) SNGL(A(i,j))
-    ENDDO
-  ENDDO
+  WRITE(1,*) SNGL(A(1:nrows,1:ncols))
 
   CLOSE(1)
   END SUBROUTINE
@@ -39,10 +35,13 @@ CONTAINS
   INTEGER, INTENT(IN) :: nrows, ncols
   CHARACTER(LEN = 100) :: full_file
 
-  full_file = TRIM(ADJUSTL(filepath))//TRIM(ADJUSTL(filename))//'.dat'
+  full_file = "/Users/kieranfitzmaurice/Documents/MATLAB/diffusion.dat"
+  !full_file = TRIM(ADJUSTL(filepath))//TRIM(ADJUSTL(filename))//'.dat'
 
   OPEN(UNIT=1,FILE=full_file,FORM='UNFORMATTED',STATUS='REPLACE',ACTION='WRITE')
 
+  WRITE(1) nrows
+  WRITE(1) ncols
   WRITE(1) A(1:nrows,1:ncols)
 
   CLOSE(1)

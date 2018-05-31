@@ -17,7 +17,7 @@ REAL(KIND = 8) :: k, l, dx, dt, max_dt,t_0,t_f,x_0
 REAL(KIND = 8), ALLOCATABLE :: x(:), u(:), concentration(:,:)
 CHARACTER(LEN = 25) :: filepath,filename
 
-filepath = '/Users/kieranfitzmaurice/Documents/GitHub/PDEs/'
+filepath = '/Users/kieranfitzmaurice/Documents/'
 filename = 'diffusion_example'
 
 k = 1 ! Diffusion coefficient
@@ -54,7 +54,7 @@ DO i = 1,t_steps
 ENDDO
 
 ! Write concentration profiles to output file
-CALL output2D_txt(filepath,filename,concentration,t_steps,n)
+CALL output2D_binary(filepath,filename,concentration,n,t_steps)
 
 END PROGRAM Diffusion
 
