@@ -54,7 +54,7 @@ DO i = 1,t_steps
 ENDDO
 
 ! Write concentration profiles to output file
-CALL output2D_txt(filepath,filename,concentration,n,t_steps)
+CALL output2D_txt(filepath,filename,concentration,t_steps,n)
 
 END PROGRAM Diffusion
 
