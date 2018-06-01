@@ -1,7 +1,7 @@
 PROGRAM Diffusion
 ! This program uses an FTCS scheme to solve the 1D Diffusion Equation
 
-USE OutputArrays
+USE output_arrays
 IMPLICIT NONE
 
 INTERFACE
@@ -15,22 +15,21 @@ END INTERFACE
 INTEGER :: i, n, t_steps
 REAL(KIND = 8) :: k, l, dx, dt, max_dt,t_0,t_f,x_0
 REAL(KIND = 8), ALLOCATABLE :: x(:), u(:), concentration(:,:)
-CHARACTER(LEN = 25) :: filepath,filename
+CHARACTER(LEN = 100) :: filename
 
-filepath = '/Users/kieranfitzmaurice/Documents/'
-filename = 'diffusion_example'
+filename = '/Users/kieranfitzmaurice/Documents/MATLAB/diffusion.dat'
 
 k = 1 ! Diffusion coefficient
 l = 20 ! Length of rod
 x_0 = l/2 ! Peak of concentration at beginning (used for analytical solution)
-n = 100 ! Number of points in rod
+n = 200 ! Number of points in rod
 
 dx = l/(n-1)
 max_dt = (0.5*dx**2)/k ! Von Neumman Stability
 dt = 0.4*max_dt
 
 t_0 = 0.1
-t_f = 5
+t_f = 10
 
 t_steps = FLOOR((t_f - t_0)/dt)
 
@@ -54,7 +53,7 @@ DO i = 1,t_steps
 ENDDO
 
 ! Write concentration profiles to output file
-CALL output2D_binary(filepath,filename,concentration,n,t_steps)
+CALL output2D_binary(filename,concentration,n,t_steps)
 
 END PROGRAM Diffusion
 
