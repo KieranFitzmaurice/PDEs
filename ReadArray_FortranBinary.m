@@ -19,7 +19,7 @@ function A = ReadArray_FortranBinary(filename,D)
 %   .  |   .           |       .
 %  end | A(nrows,ncols)|     double
 
-size = zeros(1,D);
+sz = zeros(1,D);
 fileID = fopen(filename,'rb');
 
 % Skip header stuff
@@ -27,7 +27,7 @@ fseek(fileID, 4, 'cof');
 
 for i = 1:D
     % Read in length of array's ith dimension
-    size(i) = fread(fileID,1,'int32');
+    sz(i) = fread(fileID,1,'int32');
     
     % More header stuff to skip
     fseek(fileID, 8, 'cof');
@@ -38,5 +38,5 @@ A = fread(fileID,inf,'double');
 fclose(fileID);
 
 % Fortran is column-ordered, so must transpose array
-A = reshape(A,size);
-A = A.';
+A = reshape(A,sz);
+A = permute(A,D:-1:1);
