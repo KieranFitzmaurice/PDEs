@@ -3,8 +3,6 @@ def ReadArray_FortranBinary(filename,D):
     This function allows the user to read in a D-dimensional array
     from unformatted Fortran binary.
 
-    Requires scipy.io.FortranFile
-    
     Example input file format for 2D array:
 
       Line | Entry         |    Data Type
@@ -18,6 +16,8 @@ def ReadArray_FortranBinary(filename,D):
         .  |   .           |       .
        end | A(nrows,ncols)|     double
     """
+    import numpy as np
+    from scipy.io import FortranFile
 
     f = FortranFile(filename,'r')
     sz = np.zeros(D)
@@ -32,3 +32,33 @@ def ReadArray_FortranBinary(filename,D):
     A = np.transpose(A)
 
     return(A)
+
+def MakeGIF_2D(outputfile,A):
+    """
+    This function allows the user to create a gif of a 2D system as it
+    evolves in time.
+
+    A(t,m,n) is a 3D array which holds 'snapshots' of an m x n array in time.
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.animation import FuncAnimation
+
+    numframe,m,n = A.shape
+
+    height = 6
+    width = float(n/m)*height
+    delay_in_ms = 50
+
+    fig, ax = plt.subplots(nrows = 1,ncols = 1,figsize = (height,width))
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)
+
+    cmap = plt.get_cmap('jet')
+
+    def animate(frame):
+        ax.clear()
+        ax.pcolormesh(A[frame,:,:],cmap = cmap, vmin = 0,vmax = 1)
+        ax.axis('off')
+
+    anim = FuncAnimation(fig, animate, frames = numframe, interval = delay_in_ms)
+    anim.save(outputfile, writer='imagemagick', fps=30)

@@ -4,9 +4,9 @@ PROGRAM Cahn_Hilliard
   USE output_arrays ! Array I/O module
   IMPLICIT NONE
 
-  INTEGER :: i, Nx, Ny, t_steps
-  REAL(KIND = 8) :: h, dt, epsilon, M, W, t_0, t_f, c_avg, noise
-  REAL(KIND = 8), ALLOCATABLE :: c(:,:), concentration(:,:,:)
+  INTEGER :: i, j, Nx, Ny, t_steps, numframes, interval
+  REAL(KIND = 8) :: h, dt, epsilon, M, W, t_0, t_f, t, c_avg, noise
+  REAL(KIND = 8), ALLOCATABLE :: c(:,:), concentration(:,:,:), time(:)
   CHARACTER(LEN = 100) :: filename
 
   filename = '/Users/kieranfitzmaurice/Documents/MATLAB/Spinodal.dat'
@@ -18,32 +18,41 @@ PROGRAM Cahn_Hilliard
   M = 1.0        ! Mobility
   W = 1.0        ! Double well potential height parameter
 
-  t_0 = 0.0      ! Elapsed time and number of timesteps
+  t_0 = 0.0      ! Elapsed time and number of time steps
   t_f = 5.0
-  t_steps = FLOOR((t_f - t_0)/dt)
 
-  Nx = 100       ! Number of lattice points in x-direction
-  Ny = 100       ! Number of lattice points in y-direction
+  numframes = 300! Number of frames to save for visualization
+  interval = FLOOR((t_f - t_0)/(dt*numframes)) ! Save every nth frame
+  t_steps = interval*numframes ! Number of time steps
+
+  Nx = 250       ! Number of lattice points in x-direction
+  Ny = 250       ! Number of lattice points in y-direction
 
   c_avg = 0.5    ! Average concentration in system
   noise = 0.1    ! Strength of random noise
 
   ! c is current profile, concentration stores history
   ALLOCATE(c(Ny,Nx))
-  ALLOCATE(concentration(Ny,Nx,t_steps))
+  ALLOCATE(concentration(Ny,Nx,numframes))
+  ALLOCATE(time(numframes))
 
   ! Initial conditions (homogeneous solution with random fluctuations)
   CALL RANDOM_NUMBER(c)
   c = c_avg + (2*c - 1)*noise
 
   ! Use FTCS scheme to advance system in time according to Cahn-Hilliard Eq.
-  DO i = 1,t_steps
-    c = c + dt*M*central_diff_2D(grad_FE(c,h,W,epsilon),h)
+  t = t_0
+  DO i = 1,numframes
+    DO j = 1,interval
+      c = c + dt*M*central_diff_2D(grad_FE(c,h,W,epsilon),h)
+      t = t + dt
+    ENDDO
     concentration(:,:,i) = c
+    time(i) = t
   ENDDO
 
   ! Write results to file
-  CALL output3D_binary(filename,concentration,Ny,Nx,t_steps)
+  CALL output3D_binary(filename,concentration,Ny,Nx,numframes)
 
 
 !****************************END OF MAIN PROGRAM*******************************!
