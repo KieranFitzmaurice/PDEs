@@ -23,4 +23,7 @@ read -p "Enter name of main program: " mymain; gfortran -c $mymain.f90
 myexe="execute"
 gfortran *.o -o $myexe
 ./$myexe
-./cleanup.sh
+rm *.o
+rm *.mod
+rm $myexe
+
