@@ -12,11 +12,11 @@ PROGRAM Crystal_Growth
 
   INTEGER :: i, j, mode_num, M, N, i_nuc, j_nuc, t_steps, numframes, interval, x, y
   REAL(KIND = 8) :: Lx, Ly, K, delta
-  REAL(KIND = 8) :: epsilon_avg, theta, theta_0, tau, alpha, gamma, amp, dt, h
+  REAL(KIND = 8) :: epsilon_avg,theta_0, tau, alpha, gamma, amp, dt, h
   REAL(KIND = 8) :: temp_0,temp_eq, t, t_0, t_f
   REAL(KIND = 8), ALLOCATABLE :: epsilon_value(:,:), epsilon_prime(:,:), noise(:,:)
   REAL(KIND = 8), ALLOCATABLE :: p(:,:), dpdt(:,:), temp(:,:), dTdt(:,:)
-  REAL(KIND = 8), ALLOCATABLE :: dedx(:,:), dedy(:,:), grad_e2(:,:)
+  REAL(KIND = 8), ALLOCATABLE :: theta(:,:), dedx(:,:), dedy(:,:), grad_e2(:,:)
   REAL(KIND = 8), ALLOCATABLE :: time(:), temperature(:,:,:), phase(:,:,:)
   CHARACTER(LEN = 125) :: time_file, temp_file, phase_file
 
@@ -29,21 +29,21 @@ PROGRAM Crystal_Growth
   y = 1
 
   ! System size
-  Lx = 9.0
-  Ly = 9.0
+  Lx = 12.0
+  Ly = 12.0
 
   ! Mesh Numbers
-  M = 400
-  N = 400
+  M = 800
+  N = 800
 
   ! Mesh spacing and timestep
   h = Lx/N
-  dt = 0.0001
+  dt = 0.000025
 
   t_0 = 0.0
-  t_f = 1.0
+  t_f = 0.46
 
-  numframes = 300! Number of frames to save for visualization +1 initial config
+  numframes = 349! Number of frames to save for visualization +1 initial config
   interval = FLOOR((t_f - t_0)/(dt*numframes)) ! Save every nth frame
   t_steps = interval*numframes ! Number of time steps
 
@@ -53,9 +53,9 @@ PROGRAM Crystal_Growth
   alpha = 0.9         ! Parameter influencing m(T)
   gamma = 10.0        ! Parameter influencing m(T)
   amp = 0.01          ! Amplitude of random noise at interface
-  temp_0 = 0.2        ! Initial temperature
+  temp_0 = 0.0        ! Initial temperature
   temp_eq = 1.0       ! Equilibrium temperature
-  theta_0 = PI/4       ! Parameter influencing crystal orientation
+  theta_0 = 0.0       ! Parameter influencing crystal orientation
 
   ! Varied Parameters
   K = 1.6             ! Dimensionless latent heat
@@ -71,6 +71,7 @@ PROGRAM Crystal_Growth
   ALLOCATE(dpdt(M,N))
   ALLOCATE(temp(M,N))
   ALLOCATE(dTdt(M,N))
+  ALLOCATE(theta(M,N))
   ALLOCATE(epsilon_value(M,N))
   ALLOCATE(epsilon_prime(M,N))
   ALLOCATE(noise(M,N))
@@ -86,23 +87,11 @@ PROGRAM Crystal_Growth
      DO i = 1,M
         p(i,j) = 0.0 ! Start as liquid
         temp(i,j) = temp_0 ! Begin at cooling temperature
-        theta = ATAN(REAL(j - j_nuc)/(i - i_nuc))
-        epsilon_value(i,j) = epsilon_avg*(1 + delta*COS(mode_num*(theta - theta_0)))
-        epsilon_prime(i,j) = epsilon_avg*delta*(-1*mode_num*SIN(mode_num*(theta - theta_0)))
-
      ENDDO
   ENDDO
 
-  ! must do this to avoid creating NaN
-  epsilon_value(i_nuc,j_nuc) = 0.0
-  epsilon_prime(i_nuc,j_nuc) = 0.0
-
-  dedx = partial_2D(epsilon_value*epsilon_prime,h,x)
-  dedy = partial_2D(epsilon_value*epsilon_prime,h,y)
-  grad_e2 = gradient_2D(epsilon_value**2,h)
-
   ! Seed crystal
-  p(i_nuc,j_nuc) = 1.0
+  p((i_nuc - 3):(i_nuc + 3),(j_nuc - 3):(j_nuc + 3)) = 1.0
 
   ! Record initial state of system
   t = t_0
@@ -110,22 +99,29 @@ PROGRAM Crystal_Growth
   temperature(:,:,0) = temp
   phase(:,:,0) = p
 
+  ! Add random noise at interface
+  CALL INIT_RANDOM_SEED()
+  CALL RANDOM_NUMBER(noise)
+
   ! Use FTCS scheme to advance system in time
 
   DO i = 1,numframes
      DO j = 1,interval
 
+        theta = ATAN(safe_divide(partial_2D(p,h,y),partial_2D(p,h,x)))
+        epsilon_value = epsilon_avg*(1 + delta*COS(mode_num*(theta - theta_0)))
+        epsilon_prime = epsilon_avg*delta*(-1*mode_num*SIN(mode_num*(theta - theta_0)))
+
+        dedx = partial_2D(epsilon_value*epsilon_prime,h,x)
+        dedy = partial_2D(epsilon_value*epsilon_prime,h,y)
+        grad_e2 = gradient_2D(epsilon_value**2,h)
+
         ! Calculate dp/dt
-
         dpdt = (-1*dedx*partial_2D(p,h,y) + dedy*partial_2D(p,h,x) &
-        + grad_e2*gradient_2D(p,h) + epsilon_value**2*laplacian_2D(p,h) &
-        + p*(1 - p)*(p - 0.5 + m_value(temp,temp_eq,gamma,alpha)))/tau
+             + grad_e2*gradient_2D(p,h) + epsilon_value**2*laplacian_2D(p,h) &
+             + p*(1 - p)*(p - 0.5 + m_value(temp,temp_eq,gamma,alpha)))/tau
 
-        ! Add random noise at interface
-        CALL INIT_RANDOM_SEED()
-        CALL RANDOM_NUMBER(noise)
-        noise = amp*p*(1-p)*(noise - 0.5)
-        dpdt = dpdt + noise
+        dpdt = dpdt + amp*p*(1-p)*(noise - 0.5)
 
         ! Calculate dT/dt
         dTdt = laplacian_2D(temp,h) + K*dpdt
@@ -194,6 +190,29 @@ CONTAINS
     m = alpha/PI*ATAN(gamma*(temp_eq - temp))
 
   END FUNCTION m_value
+
+  !________________Safe division to prevent NaN creation_______________________!
+
+  FUNCTION safe_divide(f,g) RESULT(h)
+    REAL(KIND = 8), DIMENSION(:,:), INTENT(IN) :: f
+    REAL(KIND = 8), DIMENSION(1:SIZE(f,1),1:SIZE(f,2)), INTENT(IN) :: g
+    REAL(KIND = 8), DIMENSION(1:SIZE(f,1),1:SIZE(f,2)) :: h
+    REAL(KIND = 8) :: zero
+    INTEGER :: i, j
+
+    zero = 0.0
+
+    DO j = 1,SIZE(f,2)
+      DO i = 1,SIZE(f,1)
+        IF (f(i,j).EQ.zero.AND.g(i,j).EQ.zero) THEN
+          h(i,j) = 0.0
+        ELSE
+          h(i,j) = f(i,j)/g(i,j)
+        ENDIF
+      ENDDO
+    ENDDO
+
+  END FUNCTION safe_divide
 
   !__________Generates a new random seed each time it is invoked_______________!
 
