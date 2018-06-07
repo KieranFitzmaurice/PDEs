@@ -60,5 +60,5 @@ def MakeGIF_2D(outputfile,A):
         ax.pcolormesh(A[frame,:,:],cmap = cmap, vmin = 0,vmax = 1)
         ax.axis('off')
 
-    anim = FuncAnimation(fig, animate, frames = numframe, interval = delay_in_ms)
+    anim = FuncAnimation(fig, animate, frames = (numframe), interval = delay_in_ms)
     anim.save(outputfile, writer='imagemagick', fps=30)
