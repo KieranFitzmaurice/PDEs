@@ -5,7 +5,7 @@ PROGRAM Crystal_Growth
   ! Based on model by Ryo Kobayashi published in
   ! Physica D 63 (1993) 410-423
 
-  USE output_arrays
+  USE array_io
   IMPLICIT NONE
 
   REAL(KIND = 8), PARAMETER :: PI = 3.14159265359
@@ -29,16 +29,16 @@ PROGRAM Crystal_Growth
   y = 1
 
   ! System size
-  Lx = 12.0
-  Ly = 12.0
+  Lx = 9.0
+  Ly = 9.0
 
   ! Mesh Numbers
-  M = 800
-  N = 800
+  M = 300
+  N = 300
 
   ! Mesh spacing and timestep
   h = Lx/N
-  dt = 0.000025
+  dt = 0.0002
 
   t_0 = 0.0
   t_f = 0.46
