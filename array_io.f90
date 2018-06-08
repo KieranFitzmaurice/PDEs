@@ -1,5 +1,61 @@
-MODULE output_arrays
+MODULE array_io
 CONTAINS
+
+  !****************************************************************************!
+
+  FUNCTION input1D_binary(filename,n1) RESULT(A)
+    ! This subroutine reads in a 1D array from a binary file
+    CHARACTER(LEN = *), INTENT(IN) :: filename
+    INTEGER, INTENT(IN):: n1
+    REAL(KIND = 8), DIMENSION(n1) :: A
+
+    OPEN(UNIT=1,FILE=filename,FORM ='UNFORMATTED',STATUS='OLD',ACTION='READ')
+    READ(1) A(1:n1)
+    CLOSE(1)
+
+  END FUNCTION input1D_binary
+
+  !****************************************************************************!
+
+  FUNCTION input2D_binary(filename,n1,n2) RESULT(A)
+    ! This subroutine reads in a 2D array in column order from a binary file
+    CHARACTER(LEN = *), INTENT(IN) :: filename
+    INTEGER, INTENT(IN):: n1, n2
+    REAL(KIND = 8), DIMENSION(n1,n2) :: A
+
+    OPEN(UNIT=1,FILE=filename,FORM ='UNFORMATTED',STATUS='OLD',ACTION='READ')
+    READ(1) A(1:n1,1:n2)
+    CLOSE(1)
+
+  END FUNCTION input2D_binary
+
+  !****************************************************************************!
+
+  FUNCTION input3D_binary(filename,n1,n2,n3) RESULT(A)
+    ! This subroutine reads in a 3D array in column order from a binary file
+    CHARACTER(LEN = *), INTENT(IN) :: filename
+    INTEGER, INTENT(IN):: n1, n2, n3
+    REAL(KIND = 8), DIMENSION(n1,n2,n3) :: A
+
+    OPEN(UNIT=1,FILE=filename,FORM ='UNFORMATTED',STATUS='OLD',ACTION='READ')
+    READ(1) A(1:n1,1:n2,1:n3)
+    CLOSE(1)
+
+  END FUNCTION input3D_binary
+
+  !****************************************************************************!
+
+  FUNCTION input4D_binary(filename,n1,n2,n3,n4) RESULT(A)
+    ! This subroutine reads in a 4D array in column order from a binary file
+    CHARACTER(LEN = *), INTENT(IN) :: filename
+    INTEGER, INTENT(IN):: n1, n2, n3, n4
+    REAL(KIND = 8), DIMENSION(n1,n2,n3,n4) :: A
+
+    OPEN(UNIT=1,FILE=filename,FORM ='UNFORMATTED',STATUS='OLD',ACTION='READ')
+    READ(1) A(1:n1,1:n2,1:n3,1:n4)
+    CLOSE(1)
+
+  END FUNCTION input4D_binary
 
   !****************************************************************************!
 
@@ -17,7 +73,7 @@ CONTAINS
     WRITE(1) A(1:n1)
 
     CLOSE(1)
-  END SUBROUTINE
+  END SUBROUTINE output1D_binary
 
   !****************************************************************************!
 
@@ -36,7 +92,7 @@ CONTAINS
     WRITE(1) A(1:n1,1:n2)
 
     CLOSE(1)
-  END SUBROUTINE
+  END SUBROUTINE output2D_binary
 
   !****************************************************************************!
 
@@ -56,7 +112,7 @@ CONTAINS
     WRITE(1) A(1:n1,1:n2,1:n3)
 
     CLOSE(1)
-  END SUBROUTINE
+  END SUBROUTINE output3D_binary
 
   !****************************************************************************!
 
@@ -77,7 +133,7 @@ CONTAINS
     WRITE(1) A(1:n1,1:n2,1:n3,1:n4)
 
     CLOSE(1)
-  END SUBROUTINE
+  END SUBROUTINE output4D_binary
 
   !****************************************************************************!
 
