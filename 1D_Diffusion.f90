@@ -1,7 +1,7 @@
 PROGRAM Diffusion
   ! This program uses an FTCS scheme to solve the 1D Diffusion Equation
 
-  USE output_arrays
+  USE array_io
   IMPLICIT NONE
 
   INTERFACE
