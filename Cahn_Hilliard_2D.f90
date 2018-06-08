@@ -1,7 +1,7 @@
 PROGRAM Cahn_Hilliard
   ! This program uses an FTCS scheme to model Spinodal Decomposition in 2D
 
-  USE output_arrays ! Array I/O module
+  USE array_io ! Array I/O module
   IMPLICIT NONE
 
   INTEGER :: i, j, Nx, Ny, t_steps, numframes, interval
