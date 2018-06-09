@@ -20,9 +20,9 @@ PROGRAM Crystal_Growth
   REAL(KIND = 8), ALLOCATABLE :: time(:), temperature(:,:,:), phase(:,:,:)
   CHARACTER(LEN = 125) :: time_file, temp_file, phase_file
 
-  time_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/time_file.dat'
-  temp_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/temp_file.dat'
-  phase_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/phase_file.dat'
+  time_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/time3_file.dat'
+  temp_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/temp3_file.dat'
+  phase_file = '/Users/kieranfitzmaurice/Documents/REU_2018/PDE_data/phase3_file.dat'
 
   ! Dimension of array to specify when taking partial derivative w.r.t. x or y
   x = 2
