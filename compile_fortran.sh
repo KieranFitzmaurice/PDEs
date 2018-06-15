@@ -8,7 +8,7 @@ while [ $yn = "Yes" ]; do
     case $yn in
     Yes)
       read -p "Enter module name: " mymod
-      gfortran -c $mymod.f90
+      gfortran -c  $mymod.f90
       echo "Add a module?"
       echo "1) Yes"
       echo "2) No"
@@ -21,7 +21,7 @@ while [ $yn = "Yes" ]; do
 done
 read -p "Enter name of main program: " mymain; gfortran -c $mymain.f90
 myexe="execute"
-gfortran *.o -o $myexe
+gfortran -O3 *.o -o $myexe
 ./$myexe
 rm *.o
 rm *.mod
